@@ -12,7 +12,9 @@ class College extends Model
        
        'uuid' , 'name' , 'logo' , 'category_id'
     ];
-    
+    protected $casts = [
+        'id' => 'integer',
+       ];
     public function category()
     {
         return $this->belongsTo(Category::class);

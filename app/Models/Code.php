@@ -12,6 +12,7 @@ class Code extends Model
 
        'uuid' , 'code' , 'user_id' , 'college_id'
     ];
+    
     public function user()
     {
         return $this->belongsTo(User::class);

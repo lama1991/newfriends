@@ -12,9 +12,13 @@ class Category extends Model
         
        'uuid' , 'name' , 'logo'
     ];
+    protected $casts = [
+        'id' => 'integer',
+       ];
     public function colleges()
     {
         return $this->hasMany(College::class);
     }
+
 
 }

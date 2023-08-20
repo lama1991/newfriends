@@ -101,9 +101,12 @@ class AuthController
             DB::beginTransaction();
             $user->update(['is_active'=>true]);
              $code->update([  'code'=>$random]);
-
+             $data=array();
+             $data['code']=$random;
             DB::commit();
-            return $this-> apiResponse([],true,'code is saved successfully.' , 200);
+          
+
+            return $this-> apiResponse($data,true,'code is saved successfully.' , 200);
        }
        else
        {

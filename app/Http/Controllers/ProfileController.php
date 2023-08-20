@@ -17,23 +17,23 @@ use Illuminate\Validation\Rule;
 class ProfileController extends Controller
 {
     use GeneralTrait,UploadTrait;
-    public function index()
-    {
-       return 'hi';
-    //     try{
-    //        $users=User::all();
-    //        dd($users);
-    //       $data=UserProfileResource::collection($users);
+   public function index()
+   {
+      
+        try{
+           $users=User::all();
+          
+          $data=UserProfileResource::collection($users);
        
-    //       return  $this-> apiResponse($data,true,'all profiles are here ',200);
+          return  $this-> apiResponse($data,true,'all profiles are here ',200);
         
         
           
-    //        }
-    //       catch (\Exception $ex){
-    //           return  $this-> apiResponse([],false,$ex->getMessage(),500);
-    //        }
-    }
+           }
+          catch (\Exception $ex){
+              return  $this-> apiResponse([],false,$ex->getMessage(),500);
+           }
+   }
 
   
 
@@ -47,9 +47,9 @@ class ProfileController extends Controller
     public function show($user_uuid)
     {
         try{
-        $user=User::where('uuid','=',$user_uuid)->first();
+        $user=User::where('uuid',$user_uuid)->first();
       
-        $data=new UserProfileResource( $user);
+        $data['profile']=new UserProfileResource( $user);
         return  $this-> apiResponse($data,true,'user profile',200);
     }
     catch (\Exception $ex)
@@ -64,8 +64,7 @@ class ProfileController extends Controller
        $validator=Validator::make($request->all(),[
             'name' => ['required'  ,'string'],
             'phone'=> ['required' ,'string'],
-            'photo2'=>'image'
-            ]
+           ]
         );
       
                 if($validator->fails()){
@@ -76,15 +75,8 @@ class ProfileController extends Controller
         $user= auth('sanctum')->user();
        
          $user->update($data);
-        if($request->hasFile('photo2'))
-        {
-         $file=$request->file('photo2');
-         $path=$this-> uploadOne($file, 'profiles');
-         }
-        
-        $user->profile()->update(['photo'=>$path]);
-        
-        $data=new UserProfileResource( $user);
+       
+        $data['profile']=new UserResource( $user);
          return  $this-> apiResponse($data,true,'user profile was updated succefully',200);
         }
         catch (\Exception $ex)
@@ -92,7 +84,36 @@ class ProfileController extends Controller
             return $this->apiResponse([], false,$ex->getMessage() ,500);
         }
     }
+ public function updatePhoto(Request $request)
+ {
+    $validator=Validator::make($request->all(),[
+        'photo2'=>'required|image'
+        ]
+    );
+    if($validator->fails()){
+        return $this-> apiResponse([], false,$validator->errors(),422);
+    }
+    try
+    {
+    $user= auth('sanctum')->user();
 
+    if($request->hasFile('photo2'))
+    {
+     $file=$request->file('photo2');
+     $path=$this->uploadOne($file, 'profiles');
+     $user->profile()->update(['photo'=>$path]);
+     }
+    
+ 
+    $data=new ProfileResource($user->profile);
+    return  $this-> apiResponse($data,true,'user profile was updated succefully',200);
+    }
+    catch (\Exception $ex)
+    {
+        return $this->apiResponse([], false,$ex->getMessage() ,500);
+    }
+
+ }
     /**
      * Remove the specified resource from storage.
      *
@@ -102,5 +123,21 @@ class ProfileController extends Controller
     public function destroy(Profile $profile)
     {
         //
+    }
+    public function myProfile()
+    {
+       
+        try{
+            $user= auth('sanctum')->user();;
+           
+            $data['my_profile']=new UserProfileResource( $user);
+          
+            return  $this-> apiResponse($data,true,'user profile',200);
+        }
+        catch (\Exception $ex)
+        {
+            return $this->apiResponse([], false,$ex->getMessage() ,500);
+        }
+
     }
 }
